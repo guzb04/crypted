@@ -12,7 +12,7 @@ app.post('/upload', (req, res)=>{
 })
 
 app.post('/download', (req, res)=>{
-    console.log('a')
+    console.log('b')
     res.status(200).send('ok')
 })
 
