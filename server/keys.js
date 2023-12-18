@@ -1,0 +1,9 @@
+const keys = {
+    PORT: 3000,
+    KEY: "IGHyLXMUTDdvvhlKJTE0symtMCo6HUtCXubLEQbbqPkKyIZHOTNbTbGY9MpIzWs2PqAGeRVua8ygN6d9xJgYQGb2aUuXRFoT0gJYnZo6gQSAyAZPQucxqxXeHLXy8ZfWtm9D2heNXJUkAx7eVBa8UEVP9PPdHm7CZUCRbQoldVQaF5tR3Ixr0coYF4TLKrJ44L0Cgnr9ywxvf14rdofV8Zfk7tDOrpUR8khn8Mllwu5CmrMH8MWzp3Wx1yQ7530EsJgV4BkvNVl96gOtD7OsSYtpa0EcKe0emcEdBHEbi3d7w0ZAki0xHp7PZnZ83wYC"
+}
+
+module.exports = {
+    PORT: keys.PORT,
+    KEY: keys.KEY
+}
