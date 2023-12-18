@@ -10,8 +10,10 @@
   "author": "Guzmán Beyhaut",
   "license": "ISC",
   "dependencies": {
+    "adm-zip": "^0.5.10",
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

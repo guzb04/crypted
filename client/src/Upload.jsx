@@ -3,6 +3,7 @@ import { useState } from "react";
 const Upload = () => {
     const [file, setFile] = useState(null);
     const [key, setKey] = useState('')
+    const [status, setStatus] = useState('')
 
     const handleFileChange = (event)=>{
         setFile(event.target.files[0])
@@ -21,10 +22,11 @@ const Upload = () => {
         }
 
         let formData = new FormData();
-        formData.append('upload_file', file)
+        formData.append('file', file)
         formData.append('upload_key', key)
 
         try{
+            setStatus('sending...')
             const response = await fetch('http://localhost:3000/upload', {
                 method: 'POST',
                 body: formData
@@ -32,6 +34,7 @@ const Upload = () => {
 
             if (response.ok){
                 console.log('ok')
+                setStatus('OK!')
             }else{
                 console.log('error')
             }
@@ -49,9 +52,10 @@ const Upload = () => {
             <form className="upload_form" onSubmit={handleSubmit}>
                 <label htmlFor="upload_string">add a key for encryption here</label>
                 <input type="text" id="upload_string" value={ key } onChange={handleKeyChange}/>
-                <input type="file" className="upload_file" onChange={handleFileChange}/>
-                <button formAction="send" className="upload_send">send the data</button>
+                <input type="file" className="upload_file" onChange={handleFileChange} name="file"/>
+                <button className="upload_send" type="submit">send the data</button>
             </form>
+            <p>STATUS: { status }</p>
     </div> );
 }
  
