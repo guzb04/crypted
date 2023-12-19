@@ -11,6 +11,11 @@ const upload = multer({dest: './temp'})
 
 app.use(cors())
 
+app.get('/key', (req, res)=>{
+    const key = crypto.randomBytes(32).toString('hex');
+    res.send(key);
+})
+
 app.post('/upload', upload.single('file'), (req, res)=>{
     const file = req.file;
     console.log(file)
@@ -29,8 +34,6 @@ app.post('/upload', upload.single('file'), (req, res)=>{
     encryptedZip.push({
         iv: iv
     })
-
-    //console.log(encryptedZip);
 
     fs.unlink(file.path, (err) => {
         if (err) {
