@@ -35,9 +35,12 @@ const Upload = () => {
             if (response.ok){
                 console.log('ok')
                 setStatus('OK!')
+                const responseBody = await response.text();
+                console.log(responseBody);
             }else{
                 console.log('error')
             }
+        
         }
         catch(error){
             console.log(error)

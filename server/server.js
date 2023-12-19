@@ -4,6 +4,7 @@ const cors = require('cors');
 const multer = require('multer');
 const zipFunctions = require ('./zipFunctions');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const app = express();
 const upload = multer({dest: './temp'})
@@ -12,9 +13,24 @@ app.use(cors())
 
 app.post('/upload', upload.single('file'), (req, res)=>{
     const file = req.file;
-
+    console.log(file)
     const textContent = zipFunctions.zipToText(file.path);
-    console.log(textContent)
+    const iv = crypto.randomBytes(16).toString('hex');
+    
+    let encryptedZip = textContent.map((piece)=>{
+        let newContent = piece.content.toString('utf-8')
+
+        keyBuffer = Buffer.from(req.body.upload_key, 'hex')
+        return{
+            filename: piece.filename,
+            content: zipFunctions.encryptContent(newContent, keyBuffer, iv)
+        }
+    })
+    encryptedZip.push({
+        iv: iv
+    })
+
+    //console.log(encryptedZip);
 
     fs.unlink(file.path, (err) => {
         if (err) {
@@ -23,7 +39,12 @@ app.post('/upload', upload.single('file'), (req, res)=>{
             console.log('File deleted successfully.');
         }
         });
-    res.send(textContent);
+    
+    res.send('ok');
+})
+
+app.get('/upload', (req, res)=>{
+
 })
 
 app.post('/download', (req, res)=>{
