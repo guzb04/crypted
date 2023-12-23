@@ -33,10 +33,31 @@ const Upload = () => {
             });
 
             if (response.ok){
-                console.log('ok')
                 setStatus('OK!')
                 const responseBody = await response.text();
                 console.log(responseBody);
+                try{
+                    const responseJson = await fetch('http://localhost:3000/upload',{
+                        method: 'GET',
+                        headers: {
+                            iv: responseBody
+                        }
+                    })
+                    const responseJsonBody = await responseJson.text();
+
+                    const blob = new Blob([responseJsonBody], {type: 'application/json'});
+                    const link = document.createElement('a');
+
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'crypted.json'
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link)
+
+                }catch(error){
+                    console.log(error)
+                }
             }else{
                 console.log('error')
             }
