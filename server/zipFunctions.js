@@ -26,7 +26,15 @@ function encryptContent(content, key, iv) {
     return encryptedContent.toString('hex');
   }
 
+  function decryptContent(encryptedContent, key, iv) {
+    const encryptedContentBuffer = Buffer.from(encryptedContent, 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, Buffer.from(iv, 'hex'));
+    const decryptedContent = Buffer.concat([decipher.update(encryptedContentBuffer), decipher.final()]);
+    return decryptedContent.toString('utf-8');
+}
+
 module.exports = {
     zipToText,
-    encryptContent
+    encryptContent,
+    decryptContent
 }

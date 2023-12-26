@@ -21,8 +21,8 @@ const Download = () => {
         }
 
         let formData = new FormData();
-        formData.append('upload_file', file)
-        formData.append('upload_key', key)
+        formData.append('file', file)
+        formData.append('key', key)
 
         try{
             const response = await fetch('http://localhost:3000/download', {
@@ -32,6 +32,18 @@ const Download = () => {
 
             if (response.ok){
                 console.log('ok')
+                const responseText = await response.text();
+                try{
+                    newResponse = await fetch('http://localhost:3000/download', {
+                        method: 'GET',
+                        headers: {  
+                            iv: responseText    
+                        }
+                    })
+                    
+                }catch(err){
+                    console.log(err)
+                }
             }else{
                 console.log('error')
             }
