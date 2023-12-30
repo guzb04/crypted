@@ -78,7 +78,7 @@ const Download = () => {
     return ( <div className="download file_form">
     <div className="form_title">
         <h3>Download your .zip file</h3>
-        <p>send your encrypted json to get your decrypted file</p>
+        <p>upload your encrypted json to get your decrypted file</p>
     </div>
         <form className="download_form" onSubmit={handleSubmit}>
             <label htmlFor="download_string">paste the key here</label>
