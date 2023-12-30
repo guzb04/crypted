@@ -67,7 +67,7 @@ const Upload = () => {
                 }catch(error){
                     console.log(error)
                 }
-            }else if (response.status == 401){
+            }else if (response.status == 400){
                 console.log(response.status);
                 setStatus('ERROR! the file attatched is not .zip');
                 console.log('error');

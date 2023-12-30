@@ -32,7 +32,7 @@ app.post('/upload', upload.single('file'), (req, res)=>{
         }
         catch(error){
             unlinkWithMessage(file.path, 'unknown file deleted successfully')
-            res.status(401).send('not a zip file')
+            res.status(400).send('not a zip file')
         }
         const iv = crypto.randomBytes(16).toString('hex');
         
@@ -82,24 +82,34 @@ app.post('/download', upload.single('file'), (req, res)=>{
         const filePath = file.path;
 
         const content = fs.readFileSync(filePath);
-        const jsonData = JSON.parse(content);
+        let jsonData;
+        try{
+            jsonData = JSON.parse(content);
+        }catch{
+            unlinkWithMessage(filePath, 'file deleted successfully');
+            res.status(400).send('not a json file')
+        }
         console.log(req.body.key)
         let iv = jsonData[jsonData.length-1].iv
 
-
-        const decryptedData = jsonData.slice(0, -1).map((piece)=>{
+        let decryptedData;
+        try{
+            decryptedData = jsonData.slice(0, -1).map((piece)=>{
             const keyBuffer = Buffer.from(req.body.key, 'hex')
             return {
                 filename: piece.filename,
                 content: zipFunctions.decryptContent(piece.content, keyBuffer, iv)
             }
         })
-
+        fs.writeFileSync(newPath, JSON.stringify(decryptedData))
+        }catch{
+            unlinkWithMessage(filePath, 'json deleted successfully');
+            res.status(401).send('invalid key')
+        }
         unlinkWithMessage(filePath, 'json deleted successfully');
 
         const newPath = `./temp/get/${iv}`
 
-        fs.writeFileSync(newPath, JSON.stringify(decryptedData))
 
         res.status(200).send(iv);
     }catch(err){

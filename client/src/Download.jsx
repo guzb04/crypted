@@ -62,8 +62,12 @@ const Download = () => {
                 }catch(err){
                     console.log(err)
                 }
+            }else if (response.status == 400){
+                setStatus('ERROR! you must send the json file with the encrypted data')
+            }else if (response.status ==401){
+                setStatus('ERROR! your key is not valid')
             }else{
-                console.log('error')
+                setStatus('ERROR! unknown error')
             }
         }
         catch(error){
@@ -74,10 +78,10 @@ const Download = () => {
     return ( <div className="download file_form">
     <div className="form_title">
         <h3>Download your .zip file</h3>
-        <p>this will return an decrypted file</p>
+        <p>send your encrypted json to get your decrypted file</p>
     </div>
         <form className="download_form" onSubmit={handleSubmit}>
-            <label htmlFor="download_string">add a key for encryption here</label>
+            <label htmlFor="download_string">paste the key here</label>
             <input type="text" id="download_string" value={key} onChange={handleKeyChange}/>
             <input type="file" className="download_file" onChange={handleFileChange}/>
             <button formAction="send" className="download_send">send the data</button>
