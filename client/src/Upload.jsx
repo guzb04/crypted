@@ -44,31 +44,42 @@ const Upload = () => {
                             iv: responseBody
                         }
                     })
-                    setStatus('OK! your download should start soon')
-                    const responseJsonBody = await responseJson.text();
-
-                    const blob = new Blob([responseJsonBody], {type: 'application/json'});
-                    const link = document.createElement('a');
-
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'crypted.json'
-
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    setStatus('OK!')
+                    if (responseJson.ok){
+                        setStatus('OK! your download should start soon')
+                        const responseJsonBody = await responseJson.text();
+    
+                        const blob = new Blob([responseJsonBody], {type: 'application/json'});
+                        const link = document.createElement('a');
+    
+                        link.href = URL.createObjectURL(blob);
+                        link.download = 'crypted.json'
+    
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        setStatus('OK!')
+                    }else if(responseJson.status == 300){
+                        setStatus('ERROR! server error, try again later')
+                    }else{
+                        setStatus('ERROR! unknown error')
+                    }
 
                 }catch(error){
                     console.log(error)
                 }
             }else if (response.status == 401){
-                console.log(response.status)
-                setStatus('ERROR! the file attatched is not .zip') 
-                console.log('error')
+                console.log(response.status);
+                setStatus('ERROR! the file attatched is not .zip');
+                console.log('error');
+            }else if (response.status == 300){
+                setStatus('ERROR! the server has ran into an error, please try again');
+            }else{
+                setStatus('ERROR! unknown error')
             }
         
         }
         catch(error){
+            setStatus('ERROR! unknown error')
             console.log(error)
         }
     }

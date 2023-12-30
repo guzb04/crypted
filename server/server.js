@@ -1,10 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const zipFunctions = require ('./zipFunctions');
+const zipFunctions = require ('./functions/zipFunctions');
 const fs = require('fs');
 const crypto = require('crypto');
 const AdmZip = require('adm-zip');
+const { unlinkWithMessage } = require('./functions/fsFunctions');
 
 const PORT = 3000;
 const app = express();
@@ -15,7 +16,7 @@ app.use(express.json());
 app.use((req, res, next) => {
     res.header('Access-Control-Expose-Headers', 'Content-Disposition');
     next();
-  });
+});
 
 app.get('/key', (req, res)=>{
     const key = crypto.randomBytes(32).toString('hex');
@@ -30,13 +31,7 @@ app.post('/upload', upload.single('file'), (req, res)=>{
             textContent = zipFunctions.zipToText(file.path);
         }
         catch(error){
-            fs.unlink(file.path, (err) => {
-                if (err) {
-                    console.error('Error deleting file:', err);
-                } else {
-                    console.log('zip deleted successfully.');
-                }
-            });
+            unlinkWithMessage(file.path, 'unknown file deleted successfully')
             res.status(401).send('not a zip file')
         }
         const iv = crypto.randomBytes(16).toString('hex');
@@ -56,39 +51,29 @@ app.post('/upload', upload.single('file'), (req, res)=>{
 
     
     
-    fs.unlink(file.path, (err) => {
-        if (err) {
-            console.error('Error deleting file:', err);
-        } else {
-            console.log('zip deleted successfully.');
-        }
-    });
+    unlinkWithMessage(file.path, 'zip deleted successfully')
     fs.writeFileSync(jsonPath, JSON.stringify(encryptedZip, null, 2), 'utf-8');
     
     res.send(iv);
 }
 catch(err){
-    res.status(300).send("error del servidor")
+    res.status(300).send("server error")
 }
 })
 
 app.get('/upload', (req, res)=>{
 
-    let jsonPath = (`./temp/get/${req.headers.iv}.json`);
-    let jsonData = fs.readFileSync(jsonPath, 'utf-8');
-
-    res.setHeader('Content-Disposition', 'attachment; filename=crypted.json');
-    res.setHeader('Content-Type', 'application/json');
-
-    fs.unlink(jsonPath, (err) =>{
-        if(err){
-            console.log(err);
-        }else{
-            console.log('json deleted successfully');
-        }
-    })
-
-    res.send(jsonData)
+    try{
+        let jsonPath = (`./temp/get/${req.headers.iv}.json`);
+        let jsonData = fs.readFileSync(jsonPath, 'utf-8');
+    
+        res.setHeader('Content-Disposition', 'attachment; filename=crypted.json');
+        res.setHeader('Content-Type', 'application/json');
+    
+        res.send(jsonData)
+    }catch{
+        res.status(300).send('server error')
+    }
 })
 
 app.post('/download', upload.single('file'), (req, res)=>{
@@ -110,13 +95,7 @@ app.post('/download', upload.single('file'), (req, res)=>{
             }
         })
 
-        fs.unlink(filePath, (err)=>{
-            if(err){
-                console.log('error deleting file', err)
-            }else{
-                console.log('json deleted successfully')
-            }
-        })
+        unlinkWithMessage(filePath, 'json deleted successfully');
 
         const newPath = `./temp/get/${iv}`
 
