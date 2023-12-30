@@ -4,6 +4,7 @@ const multer = require('multer');
 const zipFunctions = require ('./zipFunctions');
 const fs = require('fs');
 const crypto = require('crypto');
+const AdmZip = require('adm-zip');
 
 const PORT = 3000;
 const app = express();
@@ -11,6 +12,10 @@ const upload = multer({dest: './temp/POST'})
 
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+    res.header('Access-Control-Expose-Headers', 'Content-Disposition');
+    next();
+  });
 
 app.get('/key', (req, res)=>{
     const key = crypto.randomBytes(32).toString('hex');
@@ -18,11 +23,25 @@ app.get('/key', (req, res)=>{
 })
 
 app.post('/upload', upload.single('file'), (req, res)=>{
-    const file = req.file;
-    const textContent = zipFunctions.zipToText(file.path);
-    const iv = crypto.randomBytes(16).toString('hex');
-    
-    let encryptedZip = textContent.map((piece)=>{
+    try{
+        const file = req.file;
+        let textContent;
+        try{
+            textContent = zipFunctions.zipToText(file.path);
+        }
+        catch(error){
+            fs.unlink(file.path, (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                } else {
+                    console.log('zip deleted successfully.');
+                }
+            });
+            res.status(401).send('not a zip file')
+        }
+        const iv = crypto.randomBytes(16).toString('hex');
+        
+        let encryptedZip = textContent.map((piece)=>{
         keyBuffer = Buffer.from(req.body.upload_key, 'hex')
         return{
             filename: piece.filename,
@@ -32,7 +51,7 @@ app.post('/upload', upload.single('file'), (req, res)=>{
     encryptedZip.push({
         iv: iv
     })
-
+    
     const jsonPath = `./temp/get/${encryptedZip[encryptedZip.length-1].iv}.json`;
 
     
@@ -47,6 +66,10 @@ app.post('/upload', upload.single('file'), (req, res)=>{
     fs.writeFileSync(jsonPath, JSON.stringify(encryptedZip, null, 2), 'utf-8');
     
     res.send(iv);
+}
+catch(err){
+    res.status(300).send("error del servidor")
+}
 })
 
 app.get('/upload', (req, res)=>{
@@ -106,7 +129,30 @@ app.post('/download', upload.single('file'), (req, res)=>{
 })
 
 app.get('/download', (req, res)=>   {
-    
+    const downloadPath = `temp/get/${req.headers.iv}`;
+    const rawJson = fs.readFileSync(downloadPath);
+
+    const jsonData = JSON.parse(rawJson);
+    const newZip = new AdmZip();
+    jsonData.forEach((file)=>{
+        newZip.addFile(file.filename, Buffer.from(file.content, 'binary'))
+    })
+
+    const zipPath = `./temp/get/${jsonData[0].filename.slice(0, -1)}.zip`
+    newZip.writeZip(zipPath);
+
+    fs.unlink(downloadPath, (err)=>{
+        if(err){
+            console.log(err);
+        }else{
+            console.log('file deleted successfully');
+            res.setHeader('Content-Disposition', `attachment; filename=${encodeURIComponent(jsonData[0].filename.slice(0, -1))}.zip`)
+            res.setHeader('Content-Type', 'application/zip')
+            console.log(res.getHeaders())
+            const readStream = fs.createReadStream(zipPath);
+            readStream.pipe(res);
+        }
+    })
 })
 
 

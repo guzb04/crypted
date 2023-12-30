@@ -3,7 +3,7 @@ import { useState } from "react";
 const Upload = () => {
     const [file, setFile] = useState(null);
     const [key, setKey] = useState('')
-    const [status, setStatus] = useState('')
+    const [status, setStatus] = useState('waiting for a zip file to encrypt')
 
     const handleFileChange = (event)=>{
         setFile(event.target.files[0])
@@ -37,12 +37,14 @@ const Upload = () => {
                 const responseBody = await response.text();
                 console.log(responseBody);
                 try{
+                    setStatus('OK! waiting for download')
                     const responseJson = await fetch('http://localhost:3000/upload',{
                         method: 'GET',
                         headers: {
                             iv: responseBody
                         }
                     })
+                    setStatus('OK! your download should start soon')
                     const responseJsonBody = await responseJson.text();
 
                     const blob = new Blob([responseJsonBody], {type: 'application/json'});
@@ -53,12 +55,15 @@ const Upload = () => {
 
                     document.body.appendChild(link);
                     link.click();
-                    document.body.removeChild(link)
+                    document.body.removeChild(link);
+                    setStatus('OK!')
 
                 }catch(error){
                     console.log(error)
                 }
-            }else{
+            }else if (response.status == 401){
+                console.log(response.status)
+                setStatus('ERROR! the file attatched is not .zip') 
                 console.log('error')
             }
         

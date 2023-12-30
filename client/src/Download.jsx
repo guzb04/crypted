@@ -3,6 +3,7 @@ import { useState } from "react";
 const Download = () => {
     const [file, setFile] = useState(null);
     const [key, setKey] = useState('')
+    const [status, setStatus] = useState('waiting for a file to decrypt')
 
     const handleFileChange = (event)=>{
         setFile(event.target.files[0])
@@ -25,21 +26,38 @@ const Download = () => {
         formData.append('key', key)
 
         try{
+            setStatus('sending...')
             const response = await fetch('http://localhost:3000/download', {
                 method: 'POST',
                 body: formData
             });
 
             if (response.ok){
-                console.log('ok')
+                setStatus('OK! waiting for download from server')
                 const responseText = await response.text();
                 try{
-                    newResponse = await fetch('http://localhost:3000/download', {
+
+                    const newResponse = await fetch('http://localhost:3000/download', {
                         method: 'GET',
                         headers: {  
                             iv: responseText    
                         }
                     })
+                    setStatus('OK! your download should start soon')
+                    const filename = newResponse.headers.get('Content-Disposition').split('filename=')[1];
+                    
+
+                    const responseBlob = await newResponse.blob();
+
+                    const url = window.URL.createObjectURL(responseBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    setStatus('OK!')
                     
                 }catch(err){
                     console.log(err)
@@ -64,6 +82,7 @@ const Download = () => {
             <input type="file" className="download_file" onChange={handleFileChange}/>
             <button formAction="send" className="download_send">send the data</button>
         </form>
+        <p>STATUS: { status }</p>
 </div> );
 }
  
