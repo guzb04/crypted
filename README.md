@@ -1,12 +1,14 @@
 Hello! this project was made by Guzmán Beyhaut
 
 INSTRUCTIONS FOR USE:
+
 1 download node.js
 
 2 open a terminal on the client folder and run the following:
   -  npm install
   -  npm run dev
-  This should install your client dependencies and start the development server, which you can access through your browser by clicking the URL that the terminal returns to you.
+    
+This should install your client dependencies and start the development server, which you can access through your browser by clicking the URL that the terminal returns to you.
 
 3 open another terminal on the server folder and repeat the steps. this opens a server on localhost:3000 YOU DONT HAVE TO OPEN THIS ON YOUR BROWSER, THIS IS THE BACKEND.
 
