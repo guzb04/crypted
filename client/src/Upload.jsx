@@ -101,7 +101,7 @@ const Upload = () => {
     return ( <div className="upload file_form">
         <div className="form_title">
             <h3>Upload your .zip file</h3>
-            <p>this will return an encrypted file</p>
+            <p>upload the file you want to encrypt and a download will start soon!</p>
             <button onClick={ askForKey }>click me to generate a key!</button>
         </div>
             <form className="upload_form" onSubmit={handleSubmit}>
