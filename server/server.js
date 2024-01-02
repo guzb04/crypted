@@ -98,17 +98,19 @@ app.post('/download', upload.single('file'), (req, res)=>{
             const keyBuffer = Buffer.from(req.body.key, 'hex')
             return {
                 filename: piece.filename,
-                content: zipFunctions.decryptContent(piece.content, keyBuffer, iv)
+                content: zipFunctions.decryptContent(piece.content, keyBuffer, iv),
             }
         })
+        const newPath = `./temp/get/${iv}`
         fs.writeFileSync(newPath, JSON.stringify(decryptedData))
-        }catch{
+        console.log('out')
+        }catch(err){
+            console.log('error here??')
             unlinkWithMessage(filePath, 'json deleted successfully');
             res.status(401).send('invalid key')
         }
         unlinkWithMessage(filePath, 'json deleted successfully');
 
-        const newPath = `./temp/get/${iv}`
 
 
         res.status(200).send(iv);
